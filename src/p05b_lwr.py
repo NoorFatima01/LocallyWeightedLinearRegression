@@ -13,25 +13,37 @@ def main(tau, train_path, eval_path):
         train_path: Path to CSV file containing dataset for training.
         eval_path: Path to CSV file containing dataset for evaluation.
     """
-    # Load training set
+    # Load training and testing set
     x_train, y_train = util.load_dataset(train_path, add_intercept=True)
+    x_eval, y_eval = util.load_dataset(eval_path, add_intercept=True)
 
     # *** START CODE HERE ***
     # Fit a LWR model
     lwr = LocallyWeightedLinearRegression(tau)
     lwr.fit(x_train,y_train)
-    predict = lwr.predict(x_train)
-    # lwr.plot(x_train,y_train,predict,"Training set")
+    predict_train = lwr.predict(x_train)
+    predict_eval = lwr.predict(x_eval)
 
+
+    # Plot validation predictions on top of training set
     plt.figure()
     plt.plot(x_train, y_train, 'bx', linewidth=2)
-    plt.plot(x_train, predict, 'ro', linewidth=2)
+    plt.plot(x_train, predict_train, 'ro', linewidth=2)
     plt.xlabel('x')
     plt.ylabel('y')
-    plt.savefig('output/p05b.png')
+    plt.savefig('output/p05b_x_train.png')
 
-    # Get MSE value on the validation set
-    # Plot validation predictions on top of training set
+    #Testing the predictions on the evaluation/valid data set
+    plt.figure()
+    plt.plot(x_eval, y_eval, 'bx', linewidth=2)
+    plt.plot(x_eval, predict_eval, 'ro', linewidth=2)
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.savefig('output/p05b_x_eval.png')
+
+    # Get MeanSquaredError value on the validation set
+    mse = np.mean((predict_eval - y_eval)**2)
+    print(f'MSE={mse}')
     # No need to save predictions
     # Plot data
     # *** END CODE HERE ***
