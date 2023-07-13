@@ -4,7 +4,6 @@ import util
 
 from linear_model import LinearModel
 
-
 def main(tau, train_path, eval_path):
     """Problem 5(b): Locally weighted regression (LWR)
 
@@ -24,39 +23,18 @@ def main(tau, train_path, eval_path):
     predict_train = lwr.predict(x_train)
     predict_eval = lwr.predict(x_eval)
 
-
     # Plot validation predictions on top of training set
-    plt.figure()
-    plt.plot(x_train, y_train, 'bx', linewidth=2)
-    plt.plot(x_train, predict_train, 'ro', linewidth=2)
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.savefig('output/p05b_x_train.png')
+    plot(x_train,y_train,predict_train,save_path='output/p05b_x_train.png')
 
     #Testing the predictions on the evaluation/valid data set
-    plt.figure()
-    plt.plot(x_eval, y_eval, 'bx', linewidth=2)
-    plt.plot(x_eval, predict_eval, 'ro', linewidth=2)
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.savefig('output/p05b_x_eval.png')
+    plot(x_eval,y_eval,predict_eval,save_path='output/p05b_x_eval.png')
 
     # Get MeanSquaredError value on the validation set
     mse = np.mean((predict_eval - y_eval)**2)
     print(f'MSE={mse}')
-    # No need to save predictions
-    # Plot data
     # *** END CODE HERE ***
 
-
 class LocallyWeightedLinearRegression(LinearModel):
-    """Locally Weighted Regression (LWR).
-
-    Example usage:
-        > clf = LocallyWeightedLinearRegression(tau)
-        > clf.fit(x_train, y_train)
-        > clf.predict(x_eval)
-    """
 
     def __init__(self, tau):
         super(LocallyWeightedLinearRegression, self).__init__()
@@ -86,22 +64,12 @@ class LocallyWeightedLinearRegression(LinearModel):
 
             #After the completion of every inner loop, the value of theta for the specific xi will be calculated and saved in the matrix of all thetas
             self.y = self.y.reshape((m,1))
-            temp = w@self.x 
-            temp1 = np.linalg.pinv(self.x.T@temp)
-            temp2 = (w @ self.y)
-            temp3 = self.x.T @ temp2
-            self.theta[i] = (temp1 @ temp3).T
+            self.theta[i] = (np.linalg.pinv(self.x.T @ w @ self.x) @ (self.x.T @ w @ self.y)).T
 
         # *** END CODE HERE ***
 
     def predict(self, x):
-        """Make predictions given inputs x.
-        Args:
-            x: Inputs of shape (m, n).
 
-        Returns:
-            Outputs of shape (m,).
-        """
         # *** START CODE HERE ***
         m = x.shape[0]
         predictions = []
@@ -111,3 +79,10 @@ class LocallyWeightedLinearRegression(LinearModel):
             predictions.append(y_predict)
         return predictions
         # *** END CODE HERE ***
+def plot(x_values, y_values, pred_values,save_path):
+    plt.figure()
+    plt.plot(x_values, y_values, 'bx', linewidth=2)
+    plt.plot(x_values, pred_values, 'ro', linewidth=2)
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.savefig(save_path)
