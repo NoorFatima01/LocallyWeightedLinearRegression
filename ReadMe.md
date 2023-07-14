@@ -5,8 +5,8 @@
 * The values of the parameters are assigned based on the weights of the neighboring inputs (therefore, the name "Locally weighted")
 
 The way the LWR works in this code is:
-1) Take a point in x
-2) Calculate the weights of every other point w.r.t to the point taken into consideration
+1) Take a point in x from the testing dataset
+2) Calculate the weights of every point in the training dataset w.r.t to the testing dataset point taken into consideration
 3) Save these weights in the Diagonal Weighted Matrix
 4) Reduce the cost function and find theta that best fits the data for the chosen point and its neighboring area
 5) Save all the thetas for all the different points
