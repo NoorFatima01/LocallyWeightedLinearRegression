@@ -25,7 +25,6 @@ def main(tau, train_path, eval_path):
 
     # Plot validation predictions on top of training set
     plot(x_train,y_train,predict_train,save_path='output/p05b_x_train.png')
-
     #Testing the predictions on the evaluation/valid data set
     plot(x_eval,y_eval,predict_eval,save_path='output/p05b_x_eval.png')
 
@@ -46,37 +45,34 @@ class LocallyWeightedLinearRegression(LinearModel):
         """Fit LWR by saving the training set.
         """
         # *** START CODE HERE ***
-        m,n = x.shape
-        self.theta = np.zeros((m,1,n)) #Initializing theta to a zero vector. This theta vector will contain all the thetas for every point calculated from LWR
-        self.x = x
-        self.y = y
-
-        # Initialising W as a identity matrix (diagonal) with shape (m,m)
-        w = np.mat(np.eye(m))  
-
-        #This nested loop will populate w with the weights of each point w.r.t every other point.
-        for i in range(m):
-            xi = self.x[i]
-            for j in range(m):
-                xj = self.x[j]
-                denominator = 2 * self.tau * self.tau
-                w[j,j] = np.exp(-(np.dot((xi-xj), (xi-xj).T))/denominator) #Gaussian kernel
-
-            #After the completion of every inner loop, the value of theta for the specific xi will be calculated and saved in the matrix of all thetas
-            self.y = self.y.reshape((m,1))
-            self.theta[i] = (np.linalg.pinv(self.x.T @ w @ self.x) @ (self.x.T @ w @ self.y)).T
-
+        self.x = x #Our training dataset inputs have shape (300,1)
+        self.y = y #Our training dataset outputs have shape (300,)
+        m,n = self.x.shape
+        #Initializing theta to a zero vector. This theta vector will contain all the thetas for every point calculated from LWR
+        self.theta = np.zeros((n,1))
         # *** END CODE HERE ***
 
     def predict(self, x):
-
         # *** START CODE HERE ***
-        m = x.shape[0]
-        predictions = []
-        #Calculating y_predict for every point using its respective theta evaluated from weighted regression
+         
+        m = x.shape[0] #Our evaluating dataset inputs have shape (200,1)
+        n = self.x.shape[0]
+        w = np.mat(np.eye(n))  # Initialising W as a identity matrix with shape (n,n)
+        predictions = np.zeros((m,1)) #The outputs for each set of parameters will be saved here
+
         for i in range(m):
-            y_predict = np.dot(self.theta[i], x[i]) #Shape will be (1,)
-            predictions.append(y_predict)
+            #The local point that will be taken into consideration will be from the new dataset. This point will be weighted with the points from the training dataset.
+            xi = x[i]
+            #This nested loop will populate w with the weights of each point w.r.t every other point.
+            for j in range(n): 
+                xj = self.x[j]
+                denominator = 2 * self.tau * self.tau
+                w[j,j] = np.exp(-(np.dot((xi-xj), (xi-xj).T))/denominator) #Gaussian kernel
+            #After the completion of every inner loop, the value of theta for the specific xi will be calculated and saved in the matrix of all thetas
+            self.y = self.y.reshape((n,1))
+            self.theta = (np.linalg.pinv(self.x.T @ w @ self.x) @ (self.x.T @ w @ self.y))
+            y_predict = np.dot(self.theta.T, xi) #Shape will be (1,)
+            predictions[i] = y_predict
         return predictions
         # *** END CODE HERE ***
 def plot(x_values, y_values, pred_values,save_path):
